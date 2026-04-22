@@ -134,14 +134,16 @@ border-radius:8px;
     display:flex;
 }
 .lb-card{
-    max-width:1000px;
-    max-height:1000px;
+    width: min(700px, 92vw);
+    height: min(80vh, 700px);
     background:rgba(20,20,30,0.95);
     border:1px solid rgba(255,255,255,0.1);
-    border-radius:20px;
-    padding:18px;
-    box-shadow:0 0 40px rgba(139,92,246,0.3);
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 0 50px rgba(139,92,246,0.4);
     overflow:hidden;
+    display:flex;
+    flex-direction:column;
 }
 
 .lb-header{
