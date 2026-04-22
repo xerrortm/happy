@@ -121,7 +121,93 @@ padding:6px 10px;
 font-size:11px;
 border-radius:8px;
 }
+.lb-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
 
+.lb-card{
+    width:360px;
+    max-height:520px;
+    background:rgba(20,20,30,0.95);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px;
+    padding:18px;
+    box-shadow:0 0 40px rgba(139,92,246,0.3);
+    overflow:hidden;
+}
+
+.lb-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.lb-header h2{
+    font-size:18px;
+}
+
+.lb-close{
+    background:#ef4444;
+    border:none;
+    color:white;
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.lb-tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.lb-tabs button{
+    flex:1;
+    padding:8px;
+    border:none;
+    border-radius:10px;
+    background:rgba(255,255,255,0.08);
+    color:white;
+    cursor:pointer;
+}
+
+.lb-tabs .active{
+    background:#8b5cf6;
+}
+
+.lb-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    max-height:380px;
+    overflow:auto;
+}
+
+.lb-item{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 12px;
+    border-radius:12px;
+    background:rgba(255,255,255,0.06);
+    transition:0.2s;
+}
+
+.lb-item:hover{
+    transform:scale(1.02);
+    background:rgba(255,255,255,0.1);
+}
+
+.lb-rank{
+    font-weight:800;
+    color:#a78bfa;
+}
 </style>
 </head>
 
@@ -170,28 +256,17 @@ border-radius:8px;
         <button onclick="sendToRandom()">Send Kindness 🎁</button>
     </div>
 </div>
-<div id="leaderboard" class="hidden" style="
-position:fixed;inset:0;
-background:rgba(0,0,0,0.7);
-display:flex;justify-content:center;align-items:center;
-z-index:99999;
-">
-  <div style="
-  background:#111;
-  padding:20px;
-  border-radius:20px;
-  width:350px;
-  max-height:500px;
-  overflow:auto;
-  ">
-    <h2>🏆 Leaderboard</h2>
-
-    <button onclick="loadLeaderboard('points')">💕 Points</button>
-    <button onclick="loadLeaderboard('streak')">❤️‍🔥 Streak</button>
-
-    <div id="boardList" style="margin-top:15px;"></div>
-
-    <button onclick="closeLeaderboard()">Close</button>
+<div id="leaderboard" class="hidden lb-overlay">
+  <div class="lb-card">
+    <div class="lb-header">
+      <h2>🏆 Leaderboard</h2>
+      <button onclick="closeLeaderboard()" class="lb-close">✖</button>
+    </div>
+    <div class="lb-tabs">
+      <button onclick="loadLeaderboard('points')" id="tabPoints" class="active">💕 Points</button>
+      <button onclick="loadLeaderboard('streak')" id="tabStreak">🔥 Streak</button>
+    </div>
+    <div id="boardList" class="lb-list"></div>
   </div>
 </div>
 <!-- TOAST -->
@@ -431,15 +506,6 @@ async function updateStreak(username){
     showDashboard(username);
     toast(`🔥 Streak: ${newStreak} | 💕 Points: ${points}`);
 }
-window.openLeaderboard = async function(){
-    document.getElementById("leaderboard").classList.remove("hidden");
-    loadLeaderboard("points");
-};
-
-window.closeLeaderboard = function(){
-    document.getElementById("leaderboard").classList.add("hidden");
-};
-
 window.loadLeaderboard = async function(type){
 
     const snap = await get(ref(db, "users"));
@@ -447,21 +513,46 @@ window.loadLeaderboard = async function(type){
 
     let users = Object.values(snap.val());
 
-    users.sort((a,b)=>{
-        return (b[type] || 0) - (a[type] || 0);
-    });
+    users.sort((a,b)=>(b[type]||0)-(a[type]||0));
 
     const list = document.getElementById("boardList");
     list.innerHTML = "";
 
+    document.getElementById("tabPoints").classList.remove("active");
+    document.getElementById("tabStreak").classList.remove("active");
+
+    if(type === "points"){
+        document.getElementById("tabPoints").classList.add("active");
+    } else {
+        document.getElementById("tabStreak").classList.add("active");
+    }
+
     users.slice(0,10).forEach((u,i)=>{
+
+        const medal =
+            i === 0 ? "🥇" :
+            i === 1 ? "🥈" :
+            i === 2 ? "🥉" : `#${i+1}`;
+
         list.innerHTML += `
-            <div style="margin:8px 0;">
-                #${i+1} ${u.username} 
-                — ${type === "points" ? "💕" : "🔥"} ${u[type] || 0}
+            <div class="lb-item">
+                <div>
+                    <span class="lb-rank">${medal}</span>
+                    <span> ${u.username}</span>
+                </div>
+                <div>
+                    ${type === "points" ? "💕" : "🔥"} ${u[type] || 0}
+                </div>
             </div>
         `;
     });
+};
+window.openLeaderboard = function(){
+    document.getElementById("leaderboard").classList.remove("hidden");
+    loadLeaderboard("points");
+};
+window.closeLeaderboard = function(){
+    document.getElementById("leaderboard").classList.add("hidden");
 };
 window.addEventListener("load", () => {
     const u = getUser();
