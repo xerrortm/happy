@@ -176,7 +176,7 @@ border-radius:8px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+import { getDatabase, ref, set, push, get, update } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -229,14 +229,24 @@ window.registerUser = async function(){
         return;
     }
     setUser(username);
-    await set(ref(db, "users/" + username), {
-        username,
-        online: true,
-        joined: Date.now()
-    });
-    toast("✨ Joined successfully!");
+    const userRef = ref(db, "users/" + username);
+    const snap = await get(userRef);
+    if (!snap.exists()) {
+        await set(userRef, {
+            username,
+            online: true,
+            joined: Date.now(),
+            streak: 0,
+            lastActive: null
+        });
+        toast("✨ Signed up!");
+    } else {
+        await update(userRef, {
+            online: true
+        });
+        toast("✨ Logged in!");
+    }
     showDashboard(username);
-
     listenForMessages(username);
 };
 function listenForMessages(username){
@@ -269,10 +279,17 @@ async function showDashboard(u){
     document.getElementById("welcomeText").innerText = "Hey " + u + " 👋";
 
     const snap = await get(ref(db,"users/"+u));
-    if(snap.exists()){
+    if (snap.exists()) {
         const data = snap.val();
-        document.getElementById("streakText").innerText =
-            `❤️‍🔥 Kindness streak: ${data.streak || 0}`;
+        const streak = data.streak || 0;
+        const el = document.getElementById("streakText");
+        if (streak === 0) {
+            el.innerText = `🩶 Kindness streak: 0`;
+            el.style.color = "#9ca3af"; // grey
+        } else {
+            el.innerText = `❤️‍🔥 Kindness streak: ${streak}`;
+            el.style.color = "#f59e0b"; // orange
+        }
     }
 }
 /* WORDS */
