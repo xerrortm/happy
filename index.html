@@ -324,7 +324,7 @@ window.sendToRandom = async function(){
 
     await push(ref(db,"messages/"+r),{
         from:u,
-        text: selectedMessage.replace("user", randomUser),
+        text: selectedMessage.replace("user", r),
         time:Date.now()
     });
 
