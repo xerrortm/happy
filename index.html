@@ -406,6 +406,7 @@ async function showDashboard(u){
 
         el.innerText = `${streak === 0 ? "🩶" : "❤️‍🔥"}Kindness streak: ${streak}  |  💕 ${points}`;
         el.style.color = streak === 0 ? "#9ca3af" : "#f59e0b";
+        await updateCustomMessageBox(u);
     }
 }
 /* WORDS */
@@ -589,13 +590,19 @@ window.openLeaderboard = function(){
 window.closeLeaderboard = function(){
     document.getElementById("leaderboard").classList.remove("show");
 };
-const customBox = document.getElementById("customMessage");
-if (points >= 50) {
-    customBox.classList.remove("hidden");
-} else {
-    customBox.classList.add("hidden");
+async function updateCustomMessageBox(username){
+    const points = await getPoints(username);
+    const customBox = document.getElementById("customMessage");
+    const unlockText = document.querySelector("#customBox div");
+
+    if(points >= 50){
+        customBox.classList.remove("hidden");
+        unlockText.innerHTML = "✨ Custom positive messages unlocked!";
+    } else {
+        customBox.classList.add("hidden");
+        unlockText.innerHTML = `🔒 Unlock custom messages at 50 kindness points (${points}/50)`;
+    }
 }
-:::writing{variant="standard" id="58126"}
 const bannedWords = [
     "hate",
     "kill",
@@ -610,7 +617,6 @@ const bannedWords = [
     "fuck",
     "shit",
     "nigger",
-    "hell",
     "gosh",
 ];
 
@@ -621,10 +627,11 @@ function isPositiveMessage(text){
             return false;
         }
     }
-    if(text.length < 6) return false;
+    if(text.length < 6){
+        return false;
+    }
     return true;
 }
-:::
 window.addEventListener("load", () => {
     const u = getUser();
 
