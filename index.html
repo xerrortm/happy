@@ -238,18 +238,32 @@ function toast(msg){
 
 /* LOGIN */
 window.registerUser = async function(){
-    const u = document.getElementById("username").value.trim();
-    if(!u) return toast("Enter username");
+    const username = document.getElementById("username").value.trim();
+    if(!username){
+        toast("👀 Please enter a username first!");
+        return;
+    }
 
-    setUser(u);
+    let permission = Notification.permission;
 
-    await set(ref(db,"users/"+u),{
-        username:u,
-        online:true,
-        joined:Date.now()
+    if(permission !== "granted"){
+        permission = await Notification.requestPermission();
+    }
+
+    if(permission !== "granted"){
+        toast("🔕 Notifications are required to join!");
+        return;
+    }
+    setUser(username);
+    await set(ref(db, "users/" + username), {
+        username,
+        online: true,
+        joined: Date.now()
     });
+    toast("✨ Joined successfully!");
+    showDashboard(username);
 
-    showDashboard(u);
+    listenForMessages(username);
 };
 function listenForMessages(username){
 
@@ -263,28 +277,22 @@ function listenForMessages(username){
             Object.keys(data).forEach(async key => {
 
                 const msg = data[key];
-
-                // browser notification
                 if(Notification.permission === "granted"){
-                    new Notification("✨ New message", {
+                    new Notification("✨ New message recieved!", {
                         body: msg.text
                     });
                 }
-
                 toast("💌 New message received!");
-
                 await set(ref(db, "messages/" + username + "/" + key), null);
             });
         }
-
-    }, 1500);
+    }, 1000);
 }
 /* DASHBOARD */
 function showDashboard(u){
     document.getElementById("loginScreen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
     document.getElementById("welcomeText").innerText = "Hey " + u + " 👋";
-    listenForMessages(u);
 }
 
 /* WORDS */
