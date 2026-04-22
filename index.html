@@ -130,6 +130,7 @@ border-radius:8px;
 <div class="nav">
     <div class="logo">Happy <span>Notifications</span>🤩</div>
     <div id="streakText" style="color:#fbbf24;font-weight:700;"></div>
+    <button onclick="openLeaderboard()" class="smallBtn">🏆</button>
 </div>
 
 <!-- LOGIN -->
@@ -169,7 +170,30 @@ border-radius:8px;
         <button onclick="sendToRandom()">Send Kindness 🎁</button>
     </div>
 </div>
+<div id="leaderboard" class="hidden" style="
+position:fixed;inset:0;
+background:rgba(0,0,0,0.7);
+display:flex;justify-content:center;align-items:center;
+z-index:99999;
+">
+  <div style="
+  background:#111;
+  padding:20px;
+  border-radius:20px;
+  width:350px;
+  max-height:500px;
+  overflow:auto;
+  ">
+    <h2>🏆 Leaderboard</h2>
 
+    <button onclick="loadLeaderboard('points')">💕 Points</button>
+    <button onclick="loadLeaderboard('streak')">❤️‍🔥 Streak</button>
+
+    <div id="boardList" style="margin-top:15px;"></div>
+
+    <button onclick="closeLeaderboard()">Close</button>
+  </div>
+</div>
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -237,6 +261,7 @@ window.registerUser = async function(){
             online: true,
             joined: Date.now(),
             streak: 0,
+            points: 0,
             lastActive: null
         });
         toast("✨ Signed up!");
@@ -282,14 +307,11 @@ async function showDashboard(u){
     if (snap.exists()) {
         const data = snap.val();
         const streak = data.streak || 0;
+        const points = data.points || 0;
         const el = document.getElementById("streakText");
-        if (streak === 0) {
-            el.innerText = `🩶 Kindness streak: 0`;
-            el.style.color = "#9ca3af"; // grey
-        } else {
-            el.innerText = `❤️‍🔥 Kindness streak: ${streak}`;
-            el.style.color = "#f59e0b"; // orange
-        }
+
+        el.innerText = `${streak === 0 ? "🩶" : "❤️‍🔥"}Kindness streak: ${streak}  |  💕 ${points}`;
+        el.style.color = streak === 0 ? "#9ca3af" : "#f59e0b";
     }
 }
 /* WORDS */
@@ -332,10 +354,15 @@ window.sendToRandom = async function(){
     lastSendTime = now;
 
     toast(`🎁 Sent to ${r}`);
-    
+    await update(ref(db, "users/" + u), {
+        points: (await getPoints(u)) + 1
+    });
     await updateStreak(u);
 };
-
+async function getPoints(username){
+    const snap = await get(ref(db, "users/" + username));
+    return snap.exists() ? (snap.val().points || 0) : 0;
+}
 /* DELETE */
 window.deleteAccount = async function(){
 
@@ -363,38 +390,79 @@ function getToday(){
     return new Date().toDateString();
 }
 async function updateStreak(username){
+
     const userRef = ref(db, "users/" + username);
     const snap = await get(userRef);
-
     let streak = 0;
     let lastActive = null;
+    let points = 0;
 
     if(snap.exists()){
         const data = snap.val();
         streak = data.streak || 0;
         lastActive = data.lastActive || null;
+        points = data.points || 0;
     }
     const today = getToday();
-
-    if(lastActive === today){
-        return;
-    }
+    
+    if(lastActive === today) return;
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
+    let oldStreak = streak;
+    let newStreak = streak;
+
     if(lastActive === yesterday.toDateString()){
-        streak += 1;
+        newStreak += 1;
+        points += 5;
     } else {
-        streak = 1;
+        if(lastActive !== null){
+            points -= 10;
+        }
+        newStreak = 0;
     }
-    await set(userRef, {
-        username,
-        streak,
+
+    await update(userRef, {
+        streak: newStreak,
+        points: points,
         lastActive: today
     });
+
     showDashboard(username);
-    toast(`❤️‍🔥 ${streak} day kindness streak!`);
+    toast(`🔥 Streak: ${newStreak} | 💕 Points: ${points}`);
 }
+window.openLeaderboard = async function(){
+    document.getElementById("leaderboard").classList.remove("hidden");
+    loadLeaderboard("points");
+};
+
+window.closeLeaderboard = function(){
+    document.getElementById("leaderboard").classList.add("hidden");
+};
+
+window.loadLeaderboard = async function(type){
+
+    const snap = await get(ref(db, "users"));
+    if(!snap.exists()) return;
+
+    let users = Object.values(snap.val());
+
+    users.sort((a,b)=>{
+        return (b[type] || 0) - (a[type] || 0);
+    });
+
+    const list = document.getElementById("boardList");
+    list.innerHTML = "";
+
+    users.slice(0,10).forEach((u,i)=>{
+        list.innerHTML += `
+            <div style="margin:8px 0;">
+                #${i+1} ${u.username} 
+                — ${type === "points" ? "💕" : "🔥"} ${u[type] || 0}
+            </div>
+        `;
+    });
+};
 window.addEventListener("load", () => {
     const u = getUser();
 
