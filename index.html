@@ -3,110 +3,425 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Notification Sender</title>
+
+<title>🤩Happy Notifications🤩</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background:#0f172a;
-        color:white;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-        margin:0;
-    }
 
-    .box{
-        background:#1e293b;
-        padding:30px;
-        border-radius:20px;
-        width:320px;
-        box-shadow:0 0 20px rgba(0,0,0,0.4);
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
 
-    h1{
-        text-align:center;
-        margin-bottom:20px;
-    }
+body{
+    background:
+    radial-gradient(circle at top left,#1e3a8a 0%,transparent 35%),
+    radial-gradient(circle at bottom right,#7c3aed 0%,transparent 35%),
+    #050816;
 
-    input, textarea{
-        width:100%;
-        padding:12px;
-        margin-top:10px;
-        border:none;
-        border-radius:10px;
-        background:#334155;
-        color:white;
-        box-sizing:border-box;
-    }
+    color:white;
+    min-height:100vh;
+    overflow-x:hidden;
+}
 
-    button{
-        width:100%;
-        margin-top:15px;
-        padding:12px;
-        border:none;
-        border-radius:10px;
-        background:#3b82f6;
-        color:white;
-        font-size:16px;
-        cursor:pointer;
-    }
+.nav{
+    width:100%;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    backdrop-filter:blur(10px);
+}
 
-    button:hover{
-        opacity:0.9;
-    }
+.logo{
+    font-size:28px;
+    font-weight:800;
+}
+
+.logo span{
+    color:#8b5cf6;
+}
+
+.container{
+    width:100%;
+    min-height:calc(100vh - 90px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+}
+
+.card{
+    width:100%;
+    max-width:500px;
+
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:30px;
+    padding:35px;
+
+    box-shadow:
+    0 0 40px rgba(139,92,246,0.2);
+}
+
+h1{
+    font-size:38px;
+    font-weight:800;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#cbd5e1;
+    line-height:1.6;
+    margin-bottom:30px;
+}
+
+.input{
+    width:100%;
+    padding:16px;
+    margin-bottom:15px;
+
+    border:none;
+    outline:none;
+
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.08);
+    color:white;
+
+    font-size:16px;
+}
+
+.input::placeholder{
+    color:#94a3b8;
+}
+
+.section-title{
+    margin-top:20px;
+    margin-bottom:15px;
+    font-size:15px;
+    color:#cbd5e1;
+}
+
+.words{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.word{
+    padding:12px 18px;
+    border-radius:999px;
+
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.08);
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.word:hover{
+    transform:scale(1.05);
+    background:#8b5cf6;
+}
+
+.word.active{
+    background:#8b5cf6;
+    border-color:#a78bfa;
+}
+
+.button{
+    width:100%;
+    margin-top:30px;
+
+    padding:18px;
+
+    border:none;
+    border-radius:18px;
+
+    background:linear-gradient(to right,#8b5cf6,#3b82f6);
+
+    color:white;
+    font-size:17px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:0.2s;
+}
+
+.button:hover{
+    transform:translateY(-2px);
+}
+
+.status{
+    margin-top:20px;
+    text-align:center;
+    color:#cbd5e1;
+}
+
+.footer{
+    margin-top:30px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.glow{
+    position:fixed;
+    width:300px;
+    height:300px;
+    border-radius:50%;
+    background:#7c3aed;
+    filter:blur(120px);
+    opacity:0.2;
+    z-index:-1;
+}
+
+.g1{
+    top:-100px;
+    left:-100px;
+}
+
+.g2{
+    bottom:-100px;
+    right:-100px;
+}
+
 </style>
 </head>
 <body>
 
-<div class="box">
-    <h1>🔔 Notifications</h1>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
 
-    <input type="text" id="title" placeholder="Notification title">
+<div class="nav">
+    <div class="logo">
+        Happy<span>Notifications</span>🤩
+    </div>
 
-    <textarea id="message" placeholder="Notification message"></textarea>
-
-    <button onclick="requestPermission()">
-        Allow Notifications
-    </button>
-
-    <button onclick="sendNotification()">
-        Send Notification
-    </button>
+    <div>
+        Spread happiness🌈
+    </div>
 </div>
 
-<script>
-async function requestPermission() {
-    const permission = await Notification.requestPermission();
+<div class="container">
 
-    if(permission === "granted"){
-        alert("Notifications enabled!");
-    } else {
-        alert("Permission denied.");
-    }
-}
+    <div class="card">
 
-function sendNotification() {
+        <h1>Send Happiness❤️</h1>
 
-    if(Notification.permission !== "granted"){
-        alert("Please allow notifications first.");
+        <div class="subtitle">
+            Send anonymous happy words to random people using beautiful browser notifications.
+        </div>
+
+        <input class="input" id="username" placeholder="Choose a username">
+
+        <div class="section-title">
+            Pick a positive message!
+        </div>
+
+        <div class="words">
+
+            <div class="word">You matter 💖</div>
+            <div class="word">Stay strong 🌟</div>
+            <div class="word">You are amazing ✨</div>
+            <div class="word">Keep smiling 😊</div>
+            <div class="word">You got this 🚀</div>
+            <div class="word">Believe in yourself 🌈</div>
+            <div class="word">You are enough 💕</div>
+            <div class="word">Today is your day ☀️</div>
+
+        </div>
+
+        <button class="button" onclick="registerUser()">
+            Join & Enable Notifications 🔔
+        </button>
+
+        <button class="button" onclick="sendToRandom()">
+            Send To Random Person 🎁
+        </button>
+
+        <div class="status" id="status">
+            Waiting...
+        </div>
+
+        <div class="footer">
+            Copyright 2026 ERROR Inc. All rights reserved.
+        </div>
+
+    </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+
+import {
+getDatabase,
+ref,
+set,
+push,
+get,
+child
+} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA_XrD0M2R-V0IvU_lrxlZ82wIp_K7QoCg",
+    authDomain: "error-inc.firebaseapp.com",
+    databaseURL: "https://error-inc-default-rtdb.firebaseio.com",
+    projectId: "error-inc",
+    storageBucket: "error-inc.firebasestorage.app",
+    messagingSenderId: "876188868410",
+    appId: "1:876188868410:web:795477c5dd93735f5c7a03"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const status = document.getElementById("status");
+
+let selectedMessage = "";
+
+document.querySelectorAll(".word").forEach(word => {
+
+    word.addEventListener("click", () => {
+
+        document.querySelectorAll(".word").forEach(w => {
+            w.classList.remove("active");
+        });
+
+        word.classList.add("active");
+
+        selectedMessage = word.innerText;
+
+    });
+
+});
+
+async function registerUser(){
+
+    const username = document.getElementById("username").value.trim();
+
+    if(!username){
+        status.innerText = "Enter username first.";
         return;
     }
 
-    const title = document.getElementById("title").value || "Hello!";
-    const message = document.getElementById("message").value || "This is a notification.";
+    const permission = await Notification.requestPermission();
 
-    const notification = new Notification(title, {
-        body: message,
-        icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+    if(permission !== "granted"){
+        status.innerText = "Notifications denied.";
+        return;
+    }
+
+    localStorage.setItem("glowUser", username);
+
+    await set(ref(db, "users/" + username), {
+
+        username: username,
+        online: true,
+        joined: Date.now()
+
     });
 
-    notification.onclick = () => {
-        window.focus();
-    };
-}
-</script>
+    status.innerText = "Connected successfully ✨";
 
+}
+
+window.registerUser = registerUser;
+
+async function sendToRandom(){
+
+    const username = localStorage.getItem("glowUser");
+
+    if(!username){
+        status.innerText = "Register first.";
+        return;
+    }
+
+    if(!selectedMessage){
+        status.innerText = "Pick a message.";
+        return;
+    }
+
+    const snapshot = await get(ref(db, "users"));
+
+    if(!snapshot.exists()){
+        status.innerText = "No users found.";
+        return;
+    }
+
+    const users = Object.keys(snapshot.val());
+
+    const filtered = users.filter(u => u !== username);
+
+    if(filtered.length === 0){
+        status.innerText = "No other users online.";
+        return;
+    }
+
+    const randomUser =
+        filtered[Math.floor(Math.random() * filtered.length)];
+
+    await push(ref(db, "messages/" + randomUser), {
+
+        from: username,
+        text: selectedMessage,
+        time: Date.now()
+
+    });
+
+    status.innerText =
+        "Sent happiness to " + randomUser + " 💖";
+
+}
+
+window.sendToRandom = sendToRandom;
+
+async function listenForMessages(){
+
+    const username = localStorage.getItem("glowUser");
+
+    if(!username) return;
+
+    setInterval(async () => {
+
+        const snapshot =
+            await get(ref(db, "messages/" + username));
+
+        if(snapshot.exists()){
+
+            const data = snapshot.val();
+
+            Object.keys(data).forEach(async key => {
+
+                const msg = data[key];
+
+                new Notification("✨ Someone sent you joy!", {
+                    body: msg.text
+
+                });
+                await set(
+                    ref(db,
+                    "messages/" + username + "/" + key),
+                    null
+                );
+            });
+        }
+    }, 3000);
+}
+listenForMessages();
+</script>
 </body>
 </html>
