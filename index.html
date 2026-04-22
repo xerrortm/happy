@@ -110,14 +110,6 @@ button{
     background:#8b5cf6;
 }
 
-/* STATUS */
-.status{
-    margin-top:15px;
-    text-align:center;
-    color:#cbd5e1;
-    font-size:14px;
-}
-
 /* HIDDEN */
 .hidden{ display:none; }
 
@@ -135,12 +127,9 @@ button{
 <div class="center" id="loginScreen">
     <div class="card">
         <h1>Welcome 👋</h1>
-        <div class="sub">Enter once, stay connected forever ✨</div>
-
+        <div class="sub">Enter your username ✨</div>
         <input id="username" placeholder="Choose a username">
-
-        <button onclick="registerUser()">Join & Enable 🔔</button>
-
+        <button onclick="registerUser()">Join </button>
         <div class="status" id="status"></div>
     </div>
 </div>
@@ -148,9 +137,14 @@ button{
 <!-- DASHBOARD -->
 <div class="center hidden" id="dashboard">
     <div class="card">
+        <hr style="margin:20px 0; opacity:0.2">
+        <h3 style="margin-bottom:10px;">Message History</h3>
+        <div id="history" style="max-height:200px; overflow:auto; font-size:14px; color:#cbd5e1;"></div>
+        <button style="background:#ef4444; margin-top:15px;" onclick="deleteAccount()">
+            Delete Account
+        </button>
         <h1 id="welcomeText">Hello 👋</h1>
         <div class="sub">Send positive vibes instantly 💖</div>
-
         <div class="words">
             <div class="word">You matter 💖</div>
             <div class="word">Stay strong 🌟</div>
@@ -159,13 +153,23 @@ button{
             <div class="word">You are amazing ✨</div>
             <div class="word">Believe in yourself 🌈</div>
         </div>
-
         <button onclick="sendToRandom()">Send Happiness 🎁</button>
-
-        <div class="status" id="dashStatus"></div>
     </div>
 </div>
-
+<div id="toast" style="
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.8);
+color:white;
+padding:12px 18px;
+border-radius:12px;
+font-size:14px;
+display:none;
+backdrop-filter:blur(10px);
+z-index:9999;
+"></div>
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
@@ -196,8 +200,6 @@ const messages = [
     "You just made someone's day brighter ☀️"
 ];
 
-/* UI */
-const status = document.getElementById("status");
 const dashStatus = document.getElementById("dashStatus");
 
 function getUser(){
@@ -224,14 +226,14 @@ window.registerUser = async function(){
     const username = document.getElementById("username").value.trim();
 
     if(!username){
-        status.innerText = "👀 Please enter a username first!";
+        toast("👀 Please enter a username first!");
         return;
     }
 
     const permission = await Notification.requestPermission();
 
     if(permission !== "granted"){
-        status.innerText = "🔕 Notifications blocked.";
+        toast("Notifications blocked.");
         return;
     }
 
@@ -243,7 +245,7 @@ window.registerUser = async function(){
         joined: Date.now()
     });
 
-    status.innerText = "✨ Connected! Opening dashboard...";
+    toast("Connected!");
 
     showDashboard(username);
     listenForMessages(username);
@@ -256,6 +258,8 @@ function showDashboard(user){
 
     document.getElementById("welcomeText").innerText =
         `Hey ${user} 👋`;
+    loadHistory(user);
+    toast("Welcome back " + user + " 👋");
 }
 
 /* SELECT WORD */
@@ -333,8 +337,71 @@ function listenForMessages(username){
 
     }, 1500);
 }
+const toastEl = document.getElementById("toast");
 
+function toast(msg){
+    toastEl.innerText = msg;
+    toastEl.style.display = "block";
+
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => {
+        toastEl.style.display = "none";
+    }, 2500);
+}
+async function loadHistory(username){
+
+    const box = document.getElementById("history");
+
+    setInterval(async () => {
+
+        const snapshot = await get(ref(db, "messages/" + username));
+
+        box.innerHTML = "";
+
+        if(snapshot.exists()){
+            const data = snapshot.val();
+
+            Object.keys(data).forEach(key => {
+                const msg = data[key];
+
+                const div = document.createElement("div");
+                div.style.padding = "8px";
+                div.style.marginBottom = "8px";
+                div.style.background = "rgba(255,255,255,0.05)";
+                div.style.borderRadius = "10px";
+
+                div.innerHTML = `
+                    💌 <b>${msg.from}</b>: ${msg.text}
+                `;
+
+                box.appendChild(div);
+            });
+        } else {
+            box.innerHTML = "No messages yet 💭";
+        }
+
+    }, 2000);
+}
+    window.deleteAccount = async function(){
+
+    const user = getUser();
+    if(!user) return;
+
+    const confirmDelete = confirm("Are you sure you want to delete your account?");
+
+    if(!confirmDelete) return;
+
+    await set(ref(db, "users/" + user), null);
+    await set(ref(db, "messages/" + user), null);
+
+    localStorage.removeItem("glowUser");
+
+    toast("🗑️ Account deleted");
+
+    setTimeout(() => {
+        location.reload();
+    }, 1500);
+};
 </script>
-
 </body>
 </html>
