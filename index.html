@@ -199,9 +199,6 @@ const messages = [
     "The world is better with you in it 💕",
     "You just made someone's day brighter ☀️"
 ];
-
-const dashStatus = document.getElementById("dashStatus");
-
 function getUser(){
     return localStorage.getItem("glowUser");
 }
@@ -284,21 +281,19 @@ window.sendToRandom = async function(){
 
     const username = getUser();
     if(!username){
-        dashStatus.innerText = "👀 Not logged in!";
+        toast("👀 Not logged in!");
         return;
     }
 
     const snapshot = await get(ref(db, "users"));
 
     if(!snapshot.exists()){
-        dashStatus.innerText = "No users online 😢";
+        toast("No users online 😢");
         return;
     }
-
     const users = Object.keys(snapshot.val()).filter(u => u !== username);
-
     if(users.length === 0){
-        dashStatus.innerText = "No one else online 😢";
+        toast("No one else online 😢");
         return;
     }
 
@@ -310,7 +305,7 @@ window.sendToRandom = async function(){
         time: Date.now()
     });
 
-    dashStatus.innerText = `🎁 Sent kindness to ${randomUser} 💖`;
+    toast(`🎁 Sent kindness to ${randomUser} 💖`);
 };
 
 /* LISTEN */
