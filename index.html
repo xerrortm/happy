@@ -125,12 +125,14 @@ border-radius:8px;
     position:fixed;
     inset:0;
     background:rgba(0,0,0,0.75);
-    display:flex;
+    display:none;
     justify-content:center;
     align-items:center;
     z-index:99999;
 }
-
+.lb-overlay.show{
+    display:flex;
+}
 .lb-card{
     width:360px;
     max-height:520px;
@@ -160,8 +162,10 @@ border-radius:8px;
     padding:6px 10px;
     border-radius:8px;
     cursor:pointer;
+    width:auto !important;
+    flex:0 0 auto;
+    align-self:center;
 }
-
 .lb-tabs{
     display:flex;
     gap:10px;
@@ -548,11 +552,10 @@ window.loadLeaderboard = async function(type){
     });
 };
 window.openLeaderboard = function(){
-    document.getElementById("leaderboard").classList.remove("hidden");
-    loadLeaderboard("points");
+    document.getElementById("leaderboard").classList.add("show");
 };
 window.closeLeaderboard = function(){
-    document.getElementById("leaderboard").classList.add("hidden");
+    document.getElementById("leaderboard").classList.remove("show");
 };
 window.addEventListener("load", () => {
     const u = getUser();
