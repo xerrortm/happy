@@ -121,7 +121,78 @@ padding:6px 10px;
 font-size:11px;
 border-radius:8px;
 }
+#streakAnim{
+    position:fixed;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,0.75);
+    z-index:99999;
+    overflow:hidden;
+}
 
+.streakStage{
+    text-align:center;
+    position:relative;
+    animation:popIn 0.4s ease;
+}
+
+.emoji{
+    font-size:110px;
+    display:inline-block;
+    animation:flip 1.2s ease-in-out;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));
+}
+
+.number{
+    font-size:34px;
+    font-weight:900;
+    margin-top:10px;
+    color:#f59e0b;
+    animation:floatUp 1s ease;
+}
+
+.streakText{
+    margin-top:8px;
+    font-size:14px;
+    letter-spacing:3px;
+    color:#fff;
+    opacity:0.8;
+}
+
+.streakGlow{
+    position:absolute;
+    width:200px;
+    height:200px;
+    background:radial-gradient(circle, rgba(245,158,11,0.5), transparent 70%);
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    animation:glowPulse 1.2s ease-in-out;
+}
+
+@keyframes flip{
+    0%   { transform:rotateY(0deg) scale(0.8); }
+    40%  { transform:rotateY(90deg) scale(1.2); }
+    100% { transform:rotateY(0deg) scale(1); }
+}
+
+@keyframes popIn{
+    from{ transform:scale(0.4); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+@keyframes floatUp{
+    0%{ transform:translateY(20px); opacity:0; }
+    100%{ transform:translateY(0); opacity:1; }
+}
+
+@keyframes glowPulse{
+    0%{ transform:translate(-50%,-50%) scale(0.6); opacity:0; }
+    50%{ transform:translate(-50%,-50%) scale(1.4); opacity:1; }
+    100%{ transform:translate(-50%,-50%) scale(1.8); opacity:0; }
+}
 </style>
 </head>
 
@@ -169,7 +240,17 @@ border-radius:8px;
         <button onclick="sendToRandom()">Send Kindness 🎁</button>
     </div>
 </div>
+<div id="streakAnim" class="hidden">
+    <div class="streakStage">
+        <div class="streakGlow"></div>
 
+        <div id="streakEmoji" class="emoji">🩶</div>
+
+        <div id="streakNumber" class="number">0</div>
+
+        <div class="streakText">KINDNESS LEVEL UP</div>
+    </div>
+</div>
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -381,9 +462,11 @@ async function updateStreak(username){
     }
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
+    const oldStreak = streak;
 
     if(lastActive === yesterday.toDateString()){
         streak += 1;
+        showStreakAnimation(oldStreak, streak)
     } else {
         streak = 1;
     }
@@ -394,6 +477,53 @@ async function updateStreak(username){
     });
 
     toast(`❤️‍🔥 ${streak} day kindness streak!`);
+}
+function showStreakAnimation(oldStreak, newStreak){
+
+    const overlay = document.getElementById("streakAnim");
+    const emoji = document.getElementById("streakEmoji");
+    const number = document.getElementById("streakNumber");
+
+    overlay.classList.remove("hidden");
+
+    emoji.innerText = "🩶";
+    number.innerText = oldStreak;
+
+    void emoji.offsetWidth;
+
+    emoji.style.animation = "flip 1.2s ease-in-out";
+
+    setTimeout(() => {
+        emoji.innerText = "❤️‍🔥";
+    }, 500);
+
+    let start = oldStreak;
+    const end = newStreak;
+
+    const interval = setInterval(() => {
+        if(start < end){
+            start++;
+            number.innerText = start;
+        } else {
+            clearInterval(interval);
+        }
+    }, 120);
+
+    setTimeout(() => {
+        overlay.animate([
+            { transform:"scale(1)" },
+            { transform:"scale(1.05)" },
+            { transform:"scale(1)" }
+        ], {
+            duration:300,
+            iterations:1
+        });
+    }, 800);
+
+    // close
+    setTimeout(() => {
+        overlay.classList.add("hidden");
+    }, 2000);
 }
 window.addEventListener("load", () => {
     const u = getUser();
