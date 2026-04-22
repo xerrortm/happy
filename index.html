@@ -335,7 +335,8 @@ async function registerUser(){
 
     });
 
-    status.innerText = "Connected successfully ✨";
+    status.innerText = "Connected successfully!";
+    istenForMessages();
 
 }
 
@@ -408,7 +409,7 @@ async function listenForMessages(){
 
                 const msg = data[key];
 
-                new Notification("✨ Someone sent you joy!", {
+                new Notification("✨ Someone sent you a message!", {
                     body: msg.text
 
                 });
@@ -421,7 +422,7 @@ async function listenForMessages(){
         }
     }, 3000);
 }
-listenForMessages();
+
 </script>
 </body>
 </html>
