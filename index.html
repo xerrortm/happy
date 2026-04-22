@@ -501,7 +501,7 @@ async function updateStreak(username){
         if(lastActive !== null){
             points -= 10;
         }
-        newStreak = 0;
+        newStreak = 1;
     }
 
     await update(userRef, {
