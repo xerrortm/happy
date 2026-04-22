@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🤩 Happy Notifications</title>
+<title>Happy Notifications 🤩</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
@@ -129,7 +129,7 @@ border-radius:8px;
 
 <div class="nav">
     <div class="logo">Happy <span>Notifications</span>🤩</div>
-    <div>Send kindness💖</div>
+    <div id="streakText" style="color:#fbbf24;font-weight:700;"></div>
 </div>
 
 <!-- LOGIN -->
@@ -151,7 +151,7 @@ border-radius:8px;
         </div>
 
         <h1 id="welcomeText"></h1>
-        <div class="sub">Send positive vibes 💖</div>
+        <div class="sub">Send anonymous happiness 💖</div>
         <div class="words">
             <div class="word">Hey user, you're doing better than you think 💖</div>
             <div class="word">user, someone is proud of you today 🌟</div>
@@ -166,7 +166,7 @@ border-radius:8px;
             <div class="word">Be kind to yourself today, user 🌸</div>
             <div class="word">user, you are stronger than you feel 💪</div>
         </div>
-        <button onclick="sendToRandom()">Send Happiness 🎁</button>
+        <button onclick="sendToRandom()">Send Kindness 🎁</button>
     </div>
 </div>
 
@@ -191,7 +191,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
+    
+let lastSendTime = 0;
+const SEND_COOLDOWN = 5000;
 /* STATE */
 let selectedMessage = "";
 
@@ -261,12 +263,18 @@ function listenForMessages(username){
     }, 1000);
 }
 /* DASHBOARD */
-function showDashboard(u){
+async function showDashboard(u){
     document.getElementById("loginScreen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
     document.getElementById("welcomeText").innerText = "Hey " + u + " 👋";
-}
 
+    const snap = await get(ref(db,"users/"+u));
+    if(snap.exists()){
+        const data = snap.val();
+        document.getElementById("streakText").innerText =
+            `❤️‍🔥 Kindness streak: ${data.streak || 0}`;
+    }
+}
 /* WORDS */
 document.querySelectorAll(".word").forEach(w=>{
     w.onclick=()=>{
@@ -278,22 +286,37 @@ document.querySelectorAll(".word").forEach(w=>{
 
 /* SEND */
 window.sendToRandom = async function(){
+    const now = Date.now();
+
+    if(now - lastSendTime < SEND_COOLDOWN){
+        const wait = Math.ceil((SEND_COOLDOWN - (now - lastSendTime)) / 1000);
+        return toast(`⏳ Wait ${wait}s before sending again!`);
+    }
     const u = getUser();
     if(!u) return toast("Not logged in");
 
+    if(!selectedMessage){
+        return toast("💬 Pick a kindness message first!");
+    }
     const snap = await get(ref(db,"users"));
     if(!snap.exists()) return toast("No users");
 
     const users = Object.keys(snap.val()).filter(x=>x!==u);
+    if(users.length === 0) return toast("No other users found");
+
     const r = users[Math.floor(Math.random()*users.length)];
 
     await push(ref(db,"messages/"+r),{
         from:u,
-        text: selectedMessage.replace("user", r),
+        text: selectedMessage.replaceAll("user", r),
         time:Date.now()
     });
 
+    lastSendTime = now;
+
     toast(`🎁 Sent to ${r}`);
+    
+    await updateStreak(u);
 };
 
 /* DELETE */
@@ -319,6 +342,42 @@ window.deleteAccount = async function(){
 
     setTimeout(()=>location.reload(),1200);
 };
+function getToday(){
+    return new Date().toDateString();
+}
+async function updateStreak(username){
+    const userRef = ref(db, "users/" + username);
+    const snap = await get(userRef);
+
+    let streak = 0;
+    let lastActive = null;
+
+    if(snap.exists()){
+        const data = snap.val();
+        streak = data.streak || 0;
+        lastActive = data.lastActive || null;
+    }
+    const today = getToday();
+
+    if(lastActive === today){
+        return;
+    }
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if(lastActive === yesterday.toDateString()){
+        streak += 1;
+    } else {
+        streak = 1;
+    }
+    await set(userRef, {
+        username,
+        streak,
+        lastActive: today
+    });
+
+    toast(`❤️‍🔥 ${streak} day kindness streak!`);
+}
 window.addEventListener("load", () => {
     const u = getUser();
 
