@@ -3,12 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>🤩Happy Notifications🤩</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 <style>
 
 *{
@@ -196,14 +193,11 @@ h1{
     bottom:-100px;
     right:-100px;
 }
-
 </style>
 </head>
 <body>
-
 <div class="glow g1"></div>
 <div class="glow g2"></div>
-
 <div class="nav">
     <div class="logo">
         Happy<span>Notifications</span>🤩
@@ -213,23 +207,16 @@ h1{
         Spread happiness🌈
     </div>
 </div>
-
 <div class="container">
-
     <div class="card">
-
         <h1>Send Happiness❤️</h1>
-
         <div class="subtitle">
             Send anonymous happy words to random people using browser notifications.
         </div>
-
         <input class="input" id="username" placeholder="Choose a username">
-
         <div class="section-title">
             Pick a positive message!
         </div>
-
         <div class="words">
 
             <div class="word">You matter 💖</div>
@@ -288,7 +275,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 const status = document.getElementById("status");
 
 let selectedMessage = "";
@@ -343,44 +329,33 @@ async function registerUser(){
 window.registerUser = registerUser;
 
 async function sendToRandom(){
-
     const username = localStorage.getItem("glowUser");
-
     if(!username){
         status.innerText = "Register first.";
         return;
     }
-
     if(!selectedMessage){
         status.innerText = "Pick a message.";
         return;
     }
-
     const snapshot = await get(ref(db, "users"));
-
     if(!snapshot.exists()){
         status.innerText = "No users found.";
         return;
     }
-
     const users = Object.keys(snapshot.val());
-
     const filtered = users.filter(u => u !== username);
 
     if(filtered.length === 0){
         status.innerText = "No other users online.";
         return;
     }
-
     const randomUser =
         filtered[Math.floor(Math.random() * filtered.length)];
-
     await push(ref(db, "messages/" + randomUser), {
-
         from: username,
         text: selectedMessage,
         time: Date.now()
-
     });
 
     status.innerText =
@@ -389,26 +364,16 @@ async function sendToRandom(){
 }
 
 window.sendToRandom = sendToRandom;
-
 async function listenForMessages(){
-
     const username = localStorage.getItem("glowUser");
-
     if(!username) return;
-
     setInterval(async () => {
-
         const snapshot =
             await get(ref(db, "messages/" + username));
-
         if(snapshot.exists()){
-
             const data = snapshot.val();
-
             Object.keys(data).forEach(async key => {
-
                 const msg = data[key];
-
                 new Notification("✨ Someone sent you a message!", {
                     body: msg.text
 
@@ -420,9 +385,8 @@ async function listenForMessages(){
                 );
             });
         }
-    }, 3000);
+    }, 1000);
 }
-
 </script>
 </body>
 </html>
