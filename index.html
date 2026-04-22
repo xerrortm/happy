@@ -437,6 +437,7 @@ window.sendToRandom = async function(){
         points: (await getPoints(u)) + 1
     });
     await updateStreak(u);
+    showDashboard(u);
 };
 async function getPoints(username){
     const snap = await get(ref(db, "users/" + username));
