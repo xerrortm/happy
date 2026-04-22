@@ -175,12 +175,19 @@ border-radius:8px;
 
         <h1 id="welcomeText"></h1>
         <div class="sub">Send positive vibes 💖</div>
-
         <div class="words">
-            <div class="word">You matter 💖</div>
-            <div class="word">Stay strong 🌟</div>
-            <div class="word">You got this 🚀</div>
-            <div class="word">Keep smiling 😊</div>
+            <div class="word">Hey user, you're doing better than you think 💖</div>
+            <div class="word">user, someone is proud of you today 🌟</div>
+            <div class="word">Keep going user! You're getting closer 🚀</div>
+            <div class="word">It’s okay to take a breath, user 🌿</div>
+            <div class="word">You matter more than you know, user 💫</div>
+            <div class="word">user, small progress is still progress 🌈</div>
+            <div class="word">The world is better with you in it, user ☀️</div>
+            <div class="word">user, you’re not alone in this 💕</div>
+            <div class="word">Hey user, something good is coming your way ✨</div>
+            <div class="word">You’ve survived 100% of your worst days user! 🧡</div>
+            <div class="word">Be kind to yourself today, user 🌸</div>
+            <div class="word">user, you are stronger than you feel 💪</div>
         </div>
 
         <button onclick="sendToRandom()">Send Happiness 🎁</button>
@@ -317,7 +324,7 @@ window.sendToRandom = async function(){
 
     await push(ref(db,"messages/"+r),{
         from:u,
-        text:selectedMessage||"You are amazing ✨",
+        text: selectedMessage.replace("user", randomUser),
         time:Date.now()
     });
 
