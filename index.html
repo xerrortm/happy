@@ -246,7 +246,6 @@ border-radius:8px;
 <!-- DASHBOARD -->
 <div class="center hidden" id="dashboard">
     <div class="card">
-
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <button onclick="deleteAccount()" class="smallBtn" style="background:#ef4444;">🗑</button>
         </div>
@@ -287,6 +286,15 @@ border-radius:8px;
       <button onclick="loadLeaderboard('streak')" id="tabStreak">🔥 Streak</button>
     </div>
     <div id="boardList" class="lb-list"></div>
+  </div>
+</div>
+<div id="warningPopup" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:99999;">
+  <div style="background:#111827; padding:20px; border-radius:16px; width:min(400px,90vw); text-align:center; border:1px solid rgba(255,255,255,0.1);">
+    <h2 style="margin-bottom:10px;">⚠️ Warning</h2>
+    <p id="warningText" style="margin-bottom:15px; color:#cbd5e1;"></p>
+    <button onclick="closeWarning()" style="padding:10px 14px; border:none; border-radius:10px; background:#8b5cf6; color:white; cursor:pointer;">
+      OK
+    </button>
   </div>
 </div>
 <!-- TOAST -->
@@ -409,6 +417,7 @@ async function showDashboard(u){
         el.style.color = streak === 0 ? "#9ca3af" : "#f59e0b";
         await updateCustomMessageBox(u);
     }
+    checkWarning(u);
 }
 /* WORDS */
 document.querySelectorAll(".word").forEach(w=>{
@@ -619,6 +628,10 @@ const bannedWords = [
     "shit",
     "nigger",
     "gosh",
+    "gey",
+    "gay",
+    "hell",
+    "nah"
 ];
 
 function isPositiveMessage(text){
@@ -633,6 +646,22 @@ function isPositiveMessage(text){
     }
     return true;
 }
+async function checkWarning(username){
+
+    const snap = await get(ref(db, "users/" + username));
+
+    if(snap.exists()){
+        const data = snap.val();
+
+        if(data.warning && data.warning.trim() !== ""){
+            document.getElementById("warningText").innerText = data.warning;
+            document.getElementById("warningPopup").style.display = "flex";
+        }
+    }
+}
+window.closeWarning = function(){
+    document.getElementById("warningPopup").style.display = "none";
+};
 window.addEventListener("load", () => {
     const u = getUser();
 
