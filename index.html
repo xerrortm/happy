@@ -662,13 +662,20 @@ async function checkWarning(username){
 window.closeWarning = function(){
     document.getElementById("warningPopup").style.display = "none";
 };
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
     const u = getUser();
-
-    if(u){
-        showDashboard(u);
-        listenForMessages(u);
+    if(!u) return;
+    const snap = await get(ref(db, "users/" + u));
+    if(!snap.exists()){
+        localStorage.removeItem("glowUser");
+        toast("⚠️ Your account no longer exists");
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+        return;
     }
+    showDashboard(u);
+    listenForMessages(u);
 });
 </script>
 </body>
