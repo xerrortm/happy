@@ -297,6 +297,30 @@ border-radius:8px;
     </button>
   </div>
 </div>
+<div id="cooldownPopup" style="
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.8);
+z-index:999999;
+justify-content:center;
+align-items:center;
+">
+    <div style="
+    background:#111827;
+    padding:30px;
+    border-radius:20px;
+    width:min(400px,90vw);
+    text-align:center;
+    border:1px solid rgba(255,255,255,0.1);
+    ">
+        <h2 style="margin-bottom:10px;">⛔ Slow down!</h2>
+
+        <p id="cooldownText" style="color:#cbd5e1;">
+            Cooldown active...
+        </p>
+    </div>
+</div>
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -321,6 +345,8 @@ const db = getDatabase(app);
     
 let lastSendTime = 0;
 const SEND_COOLDOWN = 5000;
+let sendTimestamps = [];
+let lockedUntil = 0;
 /* STATE */
 let selectedMessage = "";
 
@@ -662,6 +688,57 @@ async function checkWarning(username){
 window.closeWarning = function(){
     document.getElementById("warningPopup").style.display = "none";
 };
+const now = Date.now();
+
+if(now < lockedUntil){
+    document.getElementById("cooldownPopup").style.display = "flex";
+    const left = Math.ceil((lockedUntil - now) / 1000);
+
+    document.getElementById("cooldownText").innerText =
+        `You are sending too fast.\nWait ${left}s`;
+
+    return;
+}
+
+sendTimestamps.push(now);
+
+sendTimestamps = sendTimestamps.filter(
+    t => now - t <= 1000
+);
+
+if(sendTimestamps.length > 3){
+
+    lockedUntil = now + 30000;
+
+    const popup = document.getElementById("cooldownPopup");
+    const text = document.getElementById("cooldownText");
+
+    popup.style.display = "flex";
+
+    const interval = setInterval(() => {
+
+        const remaining = Math.ceil(
+            (lockedUntil - Date.now()) / 1000
+        );
+
+        if(remaining <= 0){
+
+            clearInterval(interval);
+
+            popup.style.display = "none";
+
+            sendTimestamps = [];
+
+            return;
+        }
+
+        text.innerText =
+            `You are sending too fast.\nWait ${remaining}s`;
+
+    }, 200);
+
+    return;
+}
 window.addEventListener("load", async () => {
     const u = getUser();
     if(!u) return;
