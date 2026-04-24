@@ -458,6 +458,56 @@ document.querySelectorAll(".word").forEach(w=>{
 window.sendToRandom = async function(){
     const now = Date.now();
 
+if(now < lockedUntil){
+    document.getElementById("cooldownPopup").style.display = "flex";
+    const left = Math.ceil((lockedUntil - now) / 1000);
+
+    document.getElementById("cooldownText").innerText =
+        `You are sending too fast.\nWait ${left}s`;
+
+    return;
+}
+
+sendTimestamps.push(now);
+
+sendTimestamps = sendTimestamps.filter(
+    t => now - t <= 1000
+);
+
+if(sendTimestamps.length > 3){
+
+    lockedUntil = now + 30000;
+
+    const popup = document.getElementById("cooldownPopup");
+    const text = document.getElementById("cooldownText");
+
+    popup.style.display = "flex";
+
+    const interval = setInterval(() => {
+
+        const remaining = Math.ceil(
+            (lockedUntil - Date.now()) / 1000
+        );
+
+        if(remaining <= 0){
+
+            clearInterval(interval);
+
+            popup.style.display = "none";
+
+            sendTimestamps = [];
+
+            return;
+        }
+
+        text.innerText =
+            `You are sending too fast.\nWait ${remaining}s`;
+
+    }, 200);
+
+    return;
+}
+
     if(now - lastSendTime < SEND_COOLDOWN){
         const wait = Math.ceil((SEND_COOLDOWN - (now - lastSendTime)) / 1000);
         return toast(`⏳ Wait ${wait}s before sending again!`);
@@ -688,57 +738,7 @@ async function checkWarning(username){
 window.closeWarning = function(){
     document.getElementById("warningPopup").style.display = "none";
 };
-const now = Date.now();
 
-if(now < lockedUntil){
-    document.getElementById("cooldownPopup").style.display = "flex";
-    const left = Math.ceil((lockedUntil - now) / 1000);
-
-    document.getElementById("cooldownText").innerText =
-        `You are sending too fast.\nWait ${left}s`;
-
-    return;
-}
-
-sendTimestamps.push(now);
-
-sendTimestamps = sendTimestamps.filter(
-    t => now - t <= 1000
-);
-
-if(sendTimestamps.length > 3){
-
-    lockedUntil = now + 30000;
-
-    const popup = document.getElementById("cooldownPopup");
-    const text = document.getElementById("cooldownText");
-
-    popup.style.display = "flex";
-
-    const interval = setInterval(() => {
-
-        const remaining = Math.ceil(
-            (lockedUntil - Date.now()) / 1000
-        );
-
-        if(remaining <= 0){
-
-            clearInterval(interval);
-
-            popup.style.display = "none";
-
-            sendTimestamps = [];
-
-            return;
-        }
-
-        text.innerText =
-            `You are sending too fast.\nWait ${remaining}s`;
-
-    }, 200);
-
-    return;
-}
 window.addEventListener("load", async () => {
     const u = getUser();
     if(!u) return;
