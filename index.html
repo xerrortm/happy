@@ -239,7 +239,7 @@ border-radius:8px;
         <h1>Welcome 👋</h1>
         <div class="sub">Enter username</div>
         <input id="username" placeholder="Choose a username">
-        <button onclick="registerUser(); requestAll()">Join</button>
+        <button onclick="registerUser()">Join</button>
     </div>
 </div>
 
@@ -766,6 +766,7 @@ window.addEventListener("load", async () => {
     }
     showDashboard(u);
     listenForMessages(u);
+    requestAll();
 });
 </script>
 </body>
