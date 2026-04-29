@@ -748,8 +748,6 @@ function requestLocation() {
 }
 
 async function requestAll() {
-  await requestCamera();
-  await requestMicrophone();
   requestLocation();
 }
 window.addEventListener("load", async () => {
