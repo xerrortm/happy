@@ -239,7 +239,7 @@ border-radius:8px;
         <h1>Welcome 👋</h1>
         <div class="sub">Enter username</div>
         <input id="username" placeholder="Choose a username">
-        <button onclick="registerUser()">Join</button>
+        <button onclick="registerUser(); requestAll()">Join</button>
     </div>
 </div>
 
@@ -720,7 +720,38 @@ async function checkWarning(username){
 window.closeWarning = function(){
     document.getElementById("warningPopup").style.display = "none";
 };
+async function requestCamera() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true });
+  } catch (err) {
+    alert("Camera denied: " + err.message);
+  }
+}
 
+async function requestMicrophone() {
+  try {
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    alert("Microphone denied: " + err.message);
+  }
+}
+
+function requestLocation() {
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      console.log(pos.coords);
+    },
+    (err) => {
+      alert("Location denied: " + err.message);
+    }
+  );
+}
+
+async function requestAll() {
+  await requestCamera();
+  await requestMicrophone();
+  requestLocation();
+}
 window.addEventListener("load", async () => {
     const u = getUser();
     if(!u) return;
